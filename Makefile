@@ -14,22 +14,22 @@ CFLAGS	:= -Wall -g
 # ========================
 # 	BINARY
 # ========================
+SOURCES		:= $(shell find $(SOURCEDIR) -name '*.c')
 TESTS		:= $(shell find $(TESTSDIR) -name '*.c')
-TESTSBIN	:= $(patsubst $(TESTSDIR)/test_%.c, $(BINDIR)/%, $(TESTS))
+TESTSBIN	:= $(patsubst $(TESTSDIR)/%.c, $(BINDIR)/%, $(TESTS))
 
-.PHONY: compile test clean
+.PHONY: compile-tests test clean
 
-compile: $(BINDIR) $(TESTSBIN)
+compile-tests: $(BINDIR) $(TESTSBIN)
 
-	echo $(TESTSBIN)
-test: compile
+test: compile-tests
 	./runtests.sh
 
 clean:
 	rm -rf $(BINDIR)
 
-$(BINDIR)/%: $(TESTSDIR)/test_%.c $(SOURCEDIR)/%.c
-	$(CC) $(CFLAGS) -I$(SOURCEDIR) $< -o $@
+$(BINDIR)/%: $(TESTSDIR)/%.c $(SOURCES)
+	$(CC) -I$(SOURCEDIR) $< -o $@
 
 $(BINDIR):
 	mkdir -p $@

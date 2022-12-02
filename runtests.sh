@@ -38,7 +38,7 @@ __BASENAME=$(which basename)
 
 # variables
 readonly __bindir='bin'
-readonly __tests=$(ls ${__bindir})
+readonly __tests=$(${__FIND} ${__bindir} -name 'test_*')
 
 # colors
 readonly __nocolor='\033[0m'
@@ -46,8 +46,6 @@ readonly __black='\033[0;30m'
 readonly __red='\033[0;31m'
 readonly __green='\033[0;32m'
 readonly __yellow='\033[0;33m'
-
-echo ${__tests}
 
 # ======================================
 #   Functions
