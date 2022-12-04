@@ -10,7 +10,7 @@ typedef struct list_ {
     void **data_array;
 } list;
 
-int list_create(list *l);
+int list_init(list *l);
 
 int list_expand(list *l, size_t new_capacity);
 
@@ -20,7 +20,7 @@ extern inline size_t list_size(list *l) {
 
 extern inline void * list_get(list *l, size_t i) {
     assert(i < l->size);
-    return l->data_array;
+    return l->data_array[i];
 }
 
 extern inline void list_add(list *l, void *data) {

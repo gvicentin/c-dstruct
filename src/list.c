@@ -4,11 +4,13 @@
 
 // Inline functions
 size_t list_size(list *l);
-void * list_get(list *l, size_t i);
+
 void list_add(list *l, void *data);
+
+void * list_get(list *l, size_t i);
 void * list_pop(list *l);
 
-int list_create(list *l) {
+int list_init(list *l) {
     // Allocate initial buffer
     l->data_array = (void **) malloc(sizeof(void *)*INITIAL_CAPACITY); 
     if (l->data_array == NULL) {
