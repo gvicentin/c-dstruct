@@ -29,7 +29,7 @@ clean:
 	rm -rf $(BINDIR)
 
 $(BINDIR)/%: $(TESTSDIR)/%.c $(SOURCES)
-	$(CC) -I$(SOURCEDIR) $< -o $@
+	$(CC) $(CFLAGS) -I$(SOURCEDIR) $< -o $@
 
 $(BINDIR):
 	mkdir -p $@

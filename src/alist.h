@@ -3,32 +3,29 @@
 
 #include <stdlib.h>
 
-typedef struct alist_ {
+typedef struct alist_t {
     size_t size;
     size_t capacity;
     void **data_array;
 } alist;
 
-/**
- *  Initialize list structure.
- */
+
+//  Initialize list structure.
+//
 int alist_init(alist *l);
 
-/**
- *  Increase list's capacity.
- */
+//  Increase list's capacity.
+//
 int alist_expand(alist *l, size_t new_capacity);
 
-/**
- * Returns number of elements from list.
- */
+// Returns number of elements from list.
+//
 static inline size_t alist_size(alist *l) {
     return l->size;
 }
 
-/**
- * Returns element of indice 'i' from list.
- */
+// Returns element of indice 'i' from list.
+//
 void * alist_get(alist *l, size_t i);
 
 void alist_add(alist *l, void *data);
