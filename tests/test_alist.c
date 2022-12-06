@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "minunit.h"
-#include "list.c"
+#include "alist.c"
 
 #define FAIL_MSG_LEN 512
 
@@ -13,10 +13,10 @@ int g_tests_run = 0;
 static char m_fail_msg[FAIL_MSG_LEN];
 
 // Test functions
-static char * test_list_create(void);
-static char * test_list_expand(void);
-static char * test_list_add(void);
-static char * test_list_get(void);
+static char * test_alist_create(void);
+static char * test_alist_expand(void);
+static char * test_alist_add(void);
+static char * test_alist_get(void);
 static char * all_tests(void);
 
 int main(int argc, char **argv) {
@@ -33,10 +33,10 @@ int main(int argc, char **argv) {
     return result != NULL;
 }
 
-static char * test_list_create(void) {
-    list tlist;
+static char * test_alist_create(void) {
+    alist tlist;
 
-    list_init(&tlist);
+    alist_init(&tlist);
 
     // size
     snprintf(m_fail_msg, FAIL_MSG_LEN,
@@ -52,17 +52,17 @@ static char * test_list_create(void) {
     mu_assert("[list_create] Array buffer can't be NULL",
               tlist.data_array != NULL);
 
-    list_destroy(&tlist);
+    alist_destroy(&tlist);
 
     return NULL;
 }
 
-static char * test_list_expand(void) {
-    list tlist;
+static char * test_alist_expand(void) {
+    alist tlist;
     size_t new_capacity = 100, prev_capacity;
 
-    list_init(&tlist);
-    list_expand(&tlist, new_capacity);
+    alist_init(&tlist);
+    alist_expand(&tlist, new_capacity);
 
     // test expand capacity
     snprintf(m_fail_msg, FAIL_MSG_LEN,
@@ -73,26 +73,26 @@ static char * test_list_expand(void) {
     // test when not to expand
     prev_capacity = new_capacity;
     new_capacity = 50;
-    list_expand(&tlist, new_capacity);
+    alist_expand(&tlist, new_capacity);
     snprintf(m_fail_msg, FAIL_MSG_LEN,
              "[list_expand] Expected capacity (%zu), got (%zu)",
              prev_capacity, tlist.capacity);
     mu_assert(m_fail_msg, tlist.capacity == prev_capacity);
 
-    list_destroy(&tlist);
+    alist_destroy(&tlist);
 
     return NULL;
 }
 
-static char * test_list_add(void) {
-    list tlist;
+static char * test_alist_add(void) {
+    alist tlist;
     char *tstr = "foobar";
     uint8_t count = 50;
 
-    list_init(&tlist);
+    alist_init(&tlist);
 
     for (uint8_t i = 0; i < count; ++i) {
-        list_add(&tlist, (void *) tstr);
+        alist_add(&tlist, (void *) tstr);
     }
 
     // size
@@ -107,23 +107,23 @@ static char * test_list_add(void) {
              count, tlist.capacity);
     mu_assert(m_fail_msg, tlist.capacity >= count);
 
-    list_destroy(&tlist);
+    alist_destroy(&tlist);
 
     return NULL;
 }
 
-static char * test_list_get(void) {
-    list tlist;
+static char * test_alist_get(void) {
+    alist tlist;
     char *tarray[] = { "foo", "bar", "foobar" };
 
-    list_init(&tlist);
-    list_add(&tlist, (void *) tarray[0]);
-    list_add(&tlist, (void *) tarray[1]);
-    list_add(&tlist, (void *) tarray[2]);
+    alist_init(&tlist);
+    alist_add(&tlist, (void *) tarray[0]);
+    alist_add(&tlist, (void *) tarray[1]);
+    alist_add(&tlist, (void *) tarray[2]);
 
     for (uint8_t i = 0; i < 3; ++i) {
         char *expected = tarray[i];
-        char *got = (char *) list_get(&tlist, i);
+        char *got = (char *) alist_get(&tlist, i);
 
         snprintf(m_fail_msg, FAIL_MSG_LEN,
                  "[list_get] Expected (%s), got (%s)",
@@ -131,17 +131,17 @@ static char * test_list_get(void) {
         mu_assert(m_fail_msg, expected == got);
     }
 
-    list_destroy(&tlist);
+    alist_destroy(&tlist);
 
     return NULL;
 }
 
 static char * all_tests() {
     // run all tests
-    mu_run_test(test_list_create);
-    mu_run_test(test_list_expand);
-    mu_run_test(test_list_add);
-    mu_run_test(test_list_get);
+    mu_run_test(test_alist_create);
+    mu_run_test(test_alist_expand);
+    mu_run_test(test_alist_add);
+    mu_run_test(test_alist_get);
 
     return NULL;
 }
