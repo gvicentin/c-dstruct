@@ -26,7 +26,7 @@ static char m_fail_msg[FAIL_MSG_LEN];
 static alist m_list;
 static char *m_initial_state[] = {
     "1", "2", "fizz", "4", "buzz", "fizz", 
-    "7", "8", "fizz", "buzz", "11", "fizz buzz"
+    "7", "8", "fizz", "buzz", "11", "fizz"
 };
 
 //  Members forward declaration
@@ -35,6 +35,7 @@ static char * test_alist_create(void);
 static char * test_alist_expand(void);
 static char * test_alist_add(void);
 static char * test_alist_get(void);
+static char * test_alist_pop(void);
 static char * all_tests(void);
 
 //  Entrypoint
@@ -122,7 +123,7 @@ static char * test_alist_add(void) {
     };
     char *result[] = {
         "1", "2", "fizz", "4", "buzz", "fizz", 
-        "7", "8", "fizz", "buzz", "11", "fizz buzz",
+        "7", "8", "fizz", "buzz", "11", "fizz",
         "13", "14", "fizz buzz", "16", "17", "fizz"
     };
     size_t add_count = sizeof(add)/sizeof(char *);
@@ -148,7 +149,7 @@ static char * test_alist_add(void) {
 static char * test_alist_get(void) {
     char *expected_arr[] = {
         "1", "2", "fizz", "4", "buzz", "fizz", 
-        "7", "8", "fizz", "buzz", "11", "fizz buzz",
+        "7", "8", "fizz", "buzz", "11", "fizz",
     };
     size_t expected_count = sizeof(expected_arr)/sizeof(char *);
 
@@ -165,12 +166,45 @@ static char * test_alist_get(void) {
     return NULL;
 }
 
+static char * test_alist_pop(void) {
+    char *result[] = {
+        "1", "2", "fizz", "4", "buzz",
+        "fizz", "7", "8", "fizz"
+    };
+    char *pop[] = { "fizz", "11", "buzz" };
+    size_t result_count = sizeof(result)/sizeof(char *);
+    size_t pop_count = sizeof(pop)/sizeof(char *);
+
+    for (uint8_t i = 0; i < pop_count; ++i) {
+        char *expected = pop[i];
+        char *got = (char *)alist_pop(&m_list);
+
+        snprintf(m_fail_msg, FAIL_MSG_LEN,
+                 "[list_pop] Expected (%s), got (%s)",
+                 expected, got);
+        mu_assert(m_fail_msg, strcmp(expected, got) == 0);
+    }
+
+    for (uint8_t i = 0; i < result_count; ++i) {
+        char *expected = result[i];
+        char *got = (char *) alist_get(&m_list, i);
+
+        snprintf(m_fail_msg, FAIL_MSG_LEN,
+                 "[list_pop] Expected (%s), got (%s)",
+                 expected, got);
+        mu_assert(m_fail_msg, strcmp(expected, got) == 0);
+    }
+
+    return NULL;
+}
+
 static char * all_tests() {
     // run all tests
     mu_run_test(test_alist_create);
     mu_run_test(test_alist_expand);
     mu_run_test(test_alist_add);
     mu_run_test(test_alist_get);
+    mu_run_test(test_alist_pop);
 
     return NULL;
 }
