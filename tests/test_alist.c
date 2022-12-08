@@ -7,22 +7,19 @@
 #include "alist.c"
 #include "minunit.h"
 
-//  Definitions
-//
-#define FAIL_MSG_LEN 512
-
 //  Globals variables
 //
-int g_tests_run = 0;
+int g_testsRun = 0;
+int g_failMsgLen = 512;
+char *g_failMsgBuff;
 
 //  Global functions
 //
-void tests_setup(void);
-void tests_teardown(void);
+void TestsSetup(void);
+void TestsTeardown(void);
 
 //  Members variables
 //
-static char m_fail_msg[FAIL_MSG_LEN];
 static alist m_list;
 static const char *m_initial_state[] = {"1",    "2",    "fizz", "4",
                                         "buzz", "fizz", "7",    "8",
@@ -46,21 +43,28 @@ static char *helper_match_expected(const char *tag, char **expected,
 //  Entrypoint
 //
 int main(int argc, char **argv) {
-    char *result = all_tests();
+    char *result;
 
+    // setup fail msg
+    g_failMsgBuff = (char *)calloc(g_failMsgLen, sizeof(char));
+
+    result = all_tests();
     if (result != NULL) {
         printf("%s\n", result);
     } else {
         printf("ALL TESTS PASSED\n");
     }
-    printf("Tests run: %d\n", g_tests_run);
+    printf("Tests run: %d\n", g_testsRun);
+
+    // cleanup
+    free(g_failMsgBuff);
 
     return result != NULL;
 }
 
 //  Test setup
 //
-void tests_setup(void) {
+void TestsSetup(void) {
     // initialize list
     alist_init(&m_list);
 
@@ -71,7 +75,7 @@ void tests_setup(void) {
     }
 }
 
-void tests_teardown(void) {
+void TestsTeardown(void) {
     // deinitializate list
     alist_destroy(&m_list);
 }
@@ -83,19 +87,14 @@ static char *test_alist_create(void) {
     alist_init(&empty_list);
 
     // test size
-    snprintf(m_fail_msg, FAIL_MSG_LEN,
-            "[list_create] Expected size (%u), got (%zu)", 0, empty_list.size);
-    mu_assert(m_fail_msg, empty_list.size == 0);
+    MU_ASSERT_EXP("list_create", 0, empty_list.size);
 
     // test capacity
-    snprintf(m_fail_msg, FAIL_MSG_LEN,
-            "[list_create] Expected capacity (%u), got (%zu)", INITIAL_CAPACITY,
-            empty_list.capacity);
-    mu_assert(m_fail_msg, empty_list.capacity == INITIAL_CAPACITY);
+    MU_ASSERT_EXP("list_create", INITIAL_CAPACITY, empty_list.capacity);
 
     // check array allocation
-    mu_assert("[list_create] Array buffer can't be NULL",
-            empty_list.data_array != NULL);
+    MU_ASSERT("list_create", "Array buffer can't be NULL",
+              empty_list.data_array != NULL);
 
     alist_destroy(&empty_list);
 
@@ -108,19 +107,13 @@ static char *test_alist_expand(void) {
     alist_expand(&m_list, new_capacity);
 
     // test expand capacity
-    snprintf(m_fail_msg, FAIL_MSG_LEN,
-            "[list_expand] Expected capacity (%zu), got (%zu)", new_capacity,
-            m_list.capacity);
-    mu_assert(m_fail_msg, m_list.capacity == new_capacity);
+    MU_ASSERT_EXP("list_expand", new_capacity, m_list.capacity);
 
     // test when not to expand
     prev_capacity = new_capacity;
     new_capacity = 50;
     alist_expand(&m_list, new_capacity);
-    snprintf(m_fail_msg, FAIL_MSG_LEN,
-            "[list_expand] Expected capacity (%zu), got (%zu)", prev_capacity,
-            m_list.capacity);
-    mu_assert(m_fail_msg, m_list.capacity == prev_capacity);
+    MU_ASSERT_EXP("list_expand", prev_capacity, m_list.capacity);
 
     return NULL;
 }
@@ -128,8 +121,8 @@ static char *test_alist_expand(void) {
 static char *test_alist_add(void) {
     char *add[] = {"13", "14", "fizz buzz", "16", "17", "fizz"};
     char *result[] = {"1",  "2",  "fizz",      "4",    "buzz", "fizz",
-        "7",  "8",  "fizz",      "buzz", "11",   "fizz",
-        "13", "14", "fizz buzz", "16",   "17",   "fizz"};
+                      "7",  "8",  "fizz",      "buzz", "11",   "fizz",
+                      "13", "14", "fizz buzz", "16",   "17",   "fizz"};
     size_t add_count = sizeof(add) / sizeof(char *);
     size_t result_count = sizeof(result) / sizeof(char *);
 
@@ -138,16 +131,11 @@ static char *test_alist_add(void) {
     }
 
     // test size
-    snprintf(m_fail_msg, FAIL_MSG_LEN,
-            "[list_add] Expected size (%zu), got (%zu)", result_count,
-            m_list.size);
-    mu_assert(m_fail_msg, m_list.size == result_count);
+    MU_ASSERT_EXP("list_add", result_count, m_list.size);
 
     // test capacity
-    snprintf(m_fail_msg, FAIL_MSG_LEN,
-            "[list_add] Expected capacity greater than (%zu), got (%zu)",
-            result_count, m_list.capacity);
-    mu_assert(m_fail_msg, m_list.capacity >= result_count);
+    MU_ASSERT("list_add", "Expected capacity greater than result count",
+              m_list.capacity >= result_count);
 
     return NULL;
 }
@@ -191,9 +179,7 @@ static char *test_alist_pop(void) {
         char *expected = pop[i];
         char *got = (char *)alist_pop(&m_list);
 
-        snprintf(m_fail_msg, FAIL_MSG_LEN, "[list_pop] Expected (%s), got (%s)",
-                expected, got);
-        mu_assert(m_fail_msg, strcmp(expected, got) == 0);
+        MU_ASSERT_EXP_STR("list_pop", expected, got);
     }
 
     // check if match expected list
@@ -202,7 +188,7 @@ static char *test_alist_pop(void) {
 
 static char *test_alist_insert(void) {
     char *expected[] = {"1", "2",   "foo",  "fizz", "4",  "buzz", "fizz",  "7",
-        "8", "bar", "fizz", "buzz", "11", "fizz", "foobar"};
+                        "8", "bar", "fizz", "buzz", "11", "fizz", "foobar"};
     size_t count = sizeof(expected) / sizeof(char *);
 
     alist_insert(&m_list, 2, "foo");
@@ -228,14 +214,14 @@ static char *test_alist_remove(void) {
 
 static char *all_tests() {
     // run all tests
-    mu_run_test(test_alist_create);
-    mu_run_test(test_alist_expand);
-    mu_run_test(test_alist_add);
-    mu_run_test(test_alist_get);
-    mu_run_test(test_alist_set);
-    mu_run_test(test_alist_pop);
-    mu_run_test(test_alist_insert);
-    mu_run_test(test_alist_remove);
+    MU_RUN_TEST(test_alist_create);
+    MU_RUN_TEST(test_alist_expand);
+    MU_RUN_TEST(test_alist_add);
+    MU_RUN_TEST(test_alist_get);
+    MU_RUN_TEST(test_alist_set);
+    MU_RUN_TEST(test_alist_pop);
+    MU_RUN_TEST(test_alist_insert);
+    MU_RUN_TEST(test_alist_remove);
 
     return NULL;
 }
@@ -246,9 +232,7 @@ static char *helper_match_expected(const char *tag, char **expected,
         char *e = expected[i];
         char *got = (char *)alist_get(&m_list, i);
 
-        snprintf(m_fail_msg, FAIL_MSG_LEN,
-                "[%s] Index (%u), Expected (%s), got (%s)", tag, i, e, got);
-        mu_assert(m_fail_msg, strcmp(e, got) == 0);
+        MU_ASSERT_EXP_STR(tag, e, got);
     }
 
     return NULL;
