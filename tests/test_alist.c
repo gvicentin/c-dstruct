@@ -137,7 +137,7 @@ static char *test_alist_add(void) {
     MU_ASSERT("list_add", "Expected capacity greater than result count",
               m_list.capacity >= result_count);
 
-    return NULL;
+    return helper_match_expected("list_add", result, result_count);
 }
 
 static char *test_alist_get(void) {
