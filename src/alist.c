@@ -48,6 +48,17 @@ void AListAdd(AList *l, void *data) {
     l->dataArray[l->size++] = data;
 }
 
+void AListAddAll(AList *l, AList *r) {
+    if (l->size + r->size >= l->capacity) {
+        AListExpand(l, l->capacity + r->size);
+    }
+
+    for (size_t i = 0; i < r->size; ++i) {
+        l->dataArray[l->size + i] = r->dataArray[i];
+    }
+    l->size += r->size;
+}
+
 void *AListPop(AList *l) {
     assert(l->size > 0);
     return l->dataArray[--l->size];
@@ -66,6 +77,22 @@ void AListInsert(AList *l, size_t i, void *data) {
             (l->size - i) * sizeof(void *));
     l->dataArray[i] = data;
     ++l->size;
+}
+
+void AListInsertAll(AList *l, AList *r, size_t i) {
+    assert(i <= l->size);
+
+    if (l->size + r->size >= l->capacity) {
+        AListExpand(l, l->capacity + r->size);
+    }
+
+    // shift array to the ridht and add all elements
+    memmove(l->dataArray + i + r->size, l->dataArray + i,
+            (l->size - i) * sizeof(void *));
+    for (size_t j = 0; j < r->size; ++j) {
+        l->dataArray[i + j] = r->dataArray[j];
+    }
+    l->size += r->size;
 }
 
 void *AListRemove(AList *l, size_t i) {

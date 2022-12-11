@@ -44,6 +44,10 @@ static inline void AListSet(AList *l, size_t i, void *data) {
 //
 void AListAdd(AList *l, void *data);
 
+//  Add all elements from list r to list l.
+//
+void AListAddAll(AList *l, AList *r);
+
 //  Remove element from the end of the list, and
 //  returns the removed element.
 //
@@ -53,7 +57,11 @@ void *AListPop(AList *l);
 //
 void AListInsert(AList *l, size_t i, void *data);
 
-//  Removes element in index 'i', and 
+//  Insert all elements from list r to the list r.
+//
+void AListInsertAll(AList *l, AList *r, size_t i);
+
+//  Removes element in index 'i', and
 //  return the removed element.
 void *AListRemove(AList *l, size_t i);
 

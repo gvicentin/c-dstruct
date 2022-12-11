@@ -30,10 +30,12 @@ static const char *m_initialState[] = {"1",    "2",    "fizz", "4",
 static char *test_AListCreate(void);
 static char *test_AListExpand(void);
 static char *test_AListAdd(void);
+static char *test_AListAddAll(void);
 static char *test_AListGet(void);
 static char *test_AListSet(void);
 static char *test_AListPop(void);
 static char *test_AListInsert(void);
+static char *test_AListInsertAll(void);
 static char *test_AListRemove(void);
 static char *allTests(void);
 
@@ -86,13 +88,13 @@ static char *test_AListCreate(void) {
     AListInit(&emptyList);
 
     // test size
-    MU_ASSERT_EXP("list_create", 0, emptyList.size);
+    MU_ASSERT_EXP("AListInit", 0, emptyList.size);
 
     // test capacity
-    MU_ASSERT_EXP("list_create", INITIAL_CAPACITY, emptyList.capacity);
+    MU_ASSERT_EXP("AListInit", INITIAL_CAPACITY, emptyList.capacity);
 
     // check array allocation
-    MU_ASSERT("list_create", "Array buffer can't be NULL",
+    MU_ASSERT("AListInit", "Array buffer can't be NULL",
               emptyList.dataArray != NULL);
 
     AListDestroy(&emptyList);
@@ -106,13 +108,13 @@ static char *test_AListExpand(void) {
     AListExpand(&m_list, newCapacity);
 
     // test expand capacity
-    MU_ASSERT_EXP("list_expand", newCapacity, m_list.capacity);
+    MU_ASSERT_EXP("AListExpand", newCapacity, m_list.capacity);
 
     // test when not to expand
     prevCapacity = newCapacity;
     newCapacity = 50;
     AListExpand(&m_list, newCapacity);
-    MU_ASSERT_EXP("list_expand", prevCapacity, m_list.capacity);
+    MU_ASSERT_EXP("AListExpand", prevCapacity, m_list.capacity);
 
     return NULL;
 }
@@ -130,13 +132,42 @@ static char *test_AListAdd(void) {
     }
 
     // test size
-    MU_ASSERT_EXP("list_add", resultCount, m_list.size);
+    MU_ASSERT_EXP("AListAdd", resultCount, m_list.size);
 
     // test capacity
-    MU_ASSERT("list_add", "Expected capacity greater than result count",
+    MU_ASSERT("AListAdd", "Expected capacity greater than result count",
               m_list.capacity >= resultCount);
 
-    return matchExpected("list_add", result, resultCount);
+    return matchExpected("AListAdd", result, resultCount);
+}
+
+static char *test_AListAddAll(void) {
+    AList add;
+    char *result[] = {"1",  "2",  "fizz",      "4",    "buzz", "fizz",
+                      "7",  "8",  "fizz",      "buzz", "11",   "fizz",
+                      "13", "14", "fizz buzz", "16",   "17",   "fizz"};
+    size_t resultCount = sizeof(result) / sizeof(char *);
+
+    AListInit(&add);
+    AListAdd(&add, "13");
+    AListAdd(&add, "14");
+    AListAdd(&add, "fizz buzz");
+    AListAdd(&add, "16");
+    AListAdd(&add, "17");
+    AListAdd(&add, "fizz");
+    AListAddAll(&m_list, &add);
+
+    // test size
+    MU_ASSERT_EXP("AListAddAll", resultCount, m_list.size);
+
+    // test capacity
+    MU_ASSERT("AListAddAll", "Expected capacity greater than result count",
+              m_list.capacity >= resultCount);
+
+    // cleanup
+    AListDestroy(&add);
+
+    return matchExpected("AListAddAll", result, resultCount);
 }
 
 static char *test_AListGet(void) {
@@ -145,7 +176,7 @@ static char *test_AListGet(void) {
     size_t count = sizeof(expected) / sizeof(char *);
 
     // check if match expected list
-    return matchExpected("alist_get", expected, count);
+    return matchExpected("AListGet", expected, count);
 }
 
 static char *test_AListSet(void) {
@@ -161,7 +192,7 @@ static char *test_AListSet(void) {
     AListSet(&m_list, 11, "foo");
 
     // check if match expected list
-    return matchExpected("alist_set", expected, count);
+    return matchExpected("AListSet", expected, count);
 }
 
 static char *test_AListPop(void) {
@@ -175,11 +206,11 @@ static char *test_AListPop(void) {
         char *expected = pop[i];
         char *got = (char *)AListPop(&m_list);
 
-        MU_ASSERT_EXP_STR("list_pop", expected, got);
+        MU_ASSERT_EXP_STR("AListPop", expected, got);
     }
 
     // check if match expected list
-    return matchExpected("list_pop", result, resultCount);
+    return matchExpected("AListPop", result, resultCount);
 }
 
 static char *test_AListInsert(void) {
@@ -191,7 +222,30 @@ static char *test_AListInsert(void) {
     AListInsert(&m_list, 9, "bar");
     AListInsert(&m_list, 14, "foobar");
 
-    return matchExpected("list_insert", expected, count);
+    return matchExpected("AListInsert", expected, count);
+}
+
+static char *test_AListInsertAll(void) {
+    AList insert;
+    char *expected[] = {"1", "2",   "fizz", "4",      "buzz", "fizz",
+                        "7", "foo", "bar",  "foobar", "1",    "2",
+                        "3", "8",   "fizz", "buzz",   "11",   "fizz"};
+    size_t count = sizeof(expected) / sizeof(char *);
+
+    AListInit(&insert);
+    AListAdd(&insert, "foo");
+    AListAdd(&insert, "bar");
+    AListAdd(&insert, "foobar");
+    AListAdd(&insert, "1");
+    AListAdd(&insert, "2");
+    AListAdd(&insert, "3");
+
+    AListInsertAll(&m_list, &insert, 7);
+
+    // cleanup
+    AListDestroy(&insert);
+
+    return matchExpected("AListInsertAll", expected, count);
 }
 
 static char *test_AListRemove(void) {
@@ -205,7 +259,7 @@ static char *test_AListRemove(void) {
     AListRemove(&m_list, 4);
     AListRemove(&m_list, 2);
 
-    return matchExpected("list_remove", expected, count);
+    return matchExpected("AListRemove", expected, count);
 }
 
 static char *allTests() {
@@ -213,10 +267,12 @@ static char *allTests() {
     MU_RUN_TEST(test_AListCreate);
     MU_RUN_TEST(test_AListExpand);
     MU_RUN_TEST(test_AListAdd);
+    MU_RUN_TEST(test_AListAddAll);
     MU_RUN_TEST(test_AListGet);
     MU_RUN_TEST(test_AListSet);
     MU_RUN_TEST(test_AListPop);
     MU_RUN_TEST(test_AListInsert);
+    MU_RUN_TEST(test_AListInsertAll);
     MU_RUN_TEST(test_AListRemove);
 
     return NULL;
