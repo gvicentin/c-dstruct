@@ -26,3 +26,5 @@ IndentWidth: 4
 #   UT_ForIndentation (in configuration: ForIndentation) Use tabs only for indentation.
 #   UT_Always (in configuration: Always) Use tabs whenever we need to fill whitespace that spans at least from one tab stop to the next one.
 UseTab: Never
+
+AlignConsecutiveMacros: true

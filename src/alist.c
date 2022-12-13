@@ -8,8 +8,8 @@
 
 int AListInit(AList *l) {
     // Allocate initial buffer
-    l->dataArray = (void **)malloc(sizeof(void *) * INITIAL_CAPACITY);
-    if (l->dataArray == NULL) {
+    l->elmntArray = (Element *)malloc(sizeof(Element) * INITIAL_CAPACITY);
+    if (l->elmntArray == NULL) {
         return 1;
     }
 
@@ -19,7 +19,7 @@ int AListInit(AList *l) {
     return 0;
 }
 
-void AListDestroy(AList *l) { free(l->dataArray); }
+void AListDestroy(AList *l) { free(l->elmntArray); }
 
 int AListExpand(AList *l, size_t newCapacity) {
     if (newCapacity <= l->capacity) {
@@ -27,25 +27,25 @@ int AListExpand(AList *l, size_t newCapacity) {
     }
 
     // Realloc data buffer
-    void **newArray =
-        (void **)realloc(l->dataArray, sizeof(void *) * newCapacity);
+    Element *newArray =
+        (Element *)realloc(l->elmntArray, sizeof(Element) * newCapacity);
     if (newArray == NULL) {
         return 1;
     }
 
-    l->dataArray = newArray;
+    l->elmntArray = newArray;
     l->capacity = newCapacity;
 
     return 0;
 }
 
-void AListAdd(AList *l, void *data) {
+void AListAdd(AList *l, Element elmnt) {
     if (l->size >= l->capacity) {
         // Double the capacity when needed
         AListExpand(l, l->capacity << 1);
     }
 
-    l->dataArray[l->size++] = data;
+    l->elmntArray[l->size++] = elmnt;
 }
 
 void AListAddAll(AList *l, AList *r) {
@@ -54,17 +54,17 @@ void AListAddAll(AList *l, AList *r) {
     }
 
     for (size_t i = 0; i < r->size; ++i) {
-        l->dataArray[l->size + i] = r->dataArray[i];
+        l->elmntArray[l->size + i] = r->elmntArray[i];
     }
     l->size += r->size;
 }
 
-void *AListPop(AList *l) {
+Element AListPop(AList *l) {
     assert(l->size > 0);
-    return l->dataArray[--l->size];
+    return l->elmntArray[--l->size];
 }
 
-void AListInsert(AList *l, size_t i, void *data) {
+void AListInsert(AList *l, size_t i, Element elmnt) {
     assert(i <= l->size);
 
     if (l->size >= l->capacity) {
@@ -73,9 +73,9 @@ void AListInsert(AList *l, size_t i, void *data) {
     }
 
     // shift array to the right and add element
-    memmove(l->dataArray + i + 1, l->dataArray + i,
-            (l->size - i) * sizeof(void *));
-    l->dataArray[i] = data;
+    memmove(l->elmntArray + i + 1, l->elmntArray + i,
+            (l->size - i) * sizeof(Element));
+    l->elmntArray[i] = elmnt;
     ++l->size;
 }
 
@@ -87,22 +87,22 @@ void AListInsertAll(AList *l, AList *r, size_t i) {
     }
 
     // shift array to the ridht and add all elements
-    memmove(l->dataArray + i + r->size, l->dataArray + i,
-            (l->size - i) * sizeof(void *));
+    memmove(l->elmntArray + i + r->size, l->elmntArray + i,
+            (l->size - i) * sizeof(Element));
     for (size_t j = 0; j < r->size; ++j) {
-        l->dataArray[i + j] = r->dataArray[j];
+        l->elmntArray[i + j] = r->elmntArray[j];
     }
     l->size += r->size;
 }
 
-void *AListRemove(AList *l, size_t i) {
+Element AListRemove(AList *l, size_t i) {
     assert(i < l->size);
 
     // shift array to left and remove element
-    void *data = l->dataArray[i];
-    memmove(l->dataArray + i, l->dataArray + i + 1,
-            (l->size - i) * sizeof(void *));
+    Element elmnt = l->elmntArray[i];
+    memmove(l->elmntArray + i, l->elmntArray + i + 1,
+            (l->size - i) * sizeof(Element));
     --l->size;
 
-    return data;
+    return elmnt;
 }
