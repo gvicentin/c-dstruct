@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "elmnt.h"
 #include "alist.c"
 #include "minunit.h"
 
@@ -72,7 +73,7 @@ void TestsSetup(void) {
     // fill list
     size_t arr_len = sizeof(m_initialState) / sizeof(char *);
     for (uint8_t i = 0; i < arr_len; ++i) {
-        AListAdd(&m_list, (void *)m_initialState[i]);
+        AListAdd(&m_list, STRING_ELMNT(m_initialState[i]));
     }
 }
 
@@ -95,7 +96,7 @@ static char *test_AListCreate(void) {
 
     // check array allocation
     MU_ASSERT("AListInit", "Array buffer can't be NULL",
-              emptyList.dataArray != NULL);
+              emptyList.elmntArray != NULL);
 
     AListDestroy(&emptyList);
 
@@ -128,7 +129,7 @@ static char *test_AListAdd(void) {
     size_t resultCount = sizeof(result) / sizeof(char *);
 
     for (uint8_t i = 0; i < addCount; ++i) {
-        AListAdd(&m_list, (char *)add[i]);
+        AListAdd(&m_list, STRING_ELMNT(add[i]));
     }
 
     // test size
@@ -149,12 +150,12 @@ static char *test_AListAddAll(void) {
     size_t resultCount = sizeof(result) / sizeof(char *);
 
     AListInit(&add);
-    AListAdd(&add, "13");
-    AListAdd(&add, "14");
-    AListAdd(&add, "fizz buzz");
-    AListAdd(&add, "16");
-    AListAdd(&add, "17");
-    AListAdd(&add, "fizz");
+    AListAdd(&add, STRING_ELMNT("13"));
+    AListAdd(&add, STRING_ELMNT("14"));
+    AListAdd(&add, STRING_ELMNT("fizz buzz"));
+    AListAdd(&add, STRING_ELMNT("16"));
+    AListAdd(&add, STRING_ELMNT("17"));
+    AListAdd(&add, STRING_ELMNT("fizz"));
     AListAddAll(&m_list, &add);
 
     // test size
@@ -184,12 +185,12 @@ static char *test_AListSet(void) {
                         "7", "8", "foo", "bar", "11",  "foo"};
     size_t count = sizeof(expected) / sizeof(char *);
 
-    AListSet(&m_list, 2, "foo");
-    AListSet(&m_list, 4, "bar");
-    AListSet(&m_list, 5, "foo");
-    AListSet(&m_list, 8, "foo");
-    AListSet(&m_list, 9, "bar");
-    AListSet(&m_list, 11, "foo");
+    AListSet(&m_list, 2, STRING_ELMNT("foo"));
+    AListSet(&m_list, 4, STRING_ELMNT("bar"));
+    AListSet(&m_list, 5, STRING_ELMNT("foo"));
+    AListSet(&m_list, 8, STRING_ELMNT("foo"));
+    AListSet(&m_list, 9, STRING_ELMNT("bar"));
+    AListSet(&m_list, 11, STRING_ELMNT("foo"));
 
     // check if match expected list
     return matchExpected("AListSet", expected, count);
@@ -204,7 +205,7 @@ static char *test_AListPop(void) {
     for (uint8_t i = 0; i < popCount; ++i) {
         // check if pop is returning elements in the right order
         char *expected = pop[i];
-        char *got = (char *)AListPop(&m_list);
+        const char *got = ELMNT_STRING(AListPop(&m_list));
 
         MU_ASSERT_EXP_STR("AListPop", expected, got);
     }
@@ -218,9 +219,9 @@ static char *test_AListInsert(void) {
                         "8", "bar", "fizz", "buzz", "11", "fizz", "foobar"};
     size_t count = sizeof(expected) / sizeof(char *);
 
-    AListInsert(&m_list, 2, "foo");
-    AListInsert(&m_list, 9, "bar");
-    AListInsert(&m_list, 14, "foobar");
+    AListInsert(&m_list, 2, STRING_ELMNT("foo"));
+    AListInsert(&m_list, 9, STRING_ELMNT("bar"));
+    AListInsert(&m_list, 14, STRING_ELMNT("foobar"));
 
     return matchExpected("AListInsert", expected, count);
 }
@@ -233,12 +234,12 @@ static char *test_AListInsertAll(void) {
     size_t count = sizeof(expected) / sizeof(char *);
 
     AListInit(&insert);
-    AListAdd(&insert, "foo");
-    AListAdd(&insert, "bar");
-    AListAdd(&insert, "foobar");
-    AListAdd(&insert, "1");
-    AListAdd(&insert, "2");
-    AListAdd(&insert, "3");
+    AListAdd(&insert, STRING_ELMNT("foo"));
+    AListAdd(&insert, STRING_ELMNT("bar"));
+    AListAdd(&insert, STRING_ELMNT("foobar"));
+    AListAdd(&insert, STRING_ELMNT("1"));
+    AListAdd(&insert, STRING_ELMNT("2"));
+    AListAdd(&insert, STRING_ELMNT("3"));
 
     AListInsertAll(&m_list, &insert, 7);
 
@@ -281,7 +282,7 @@ static char *allTests() {
 static char *matchExpected(const char *tag, char **expected, size_t count) {
     for (uint8_t i = 0; i < count; ++i) {
         char *e = expected[i];
-        char *got = (char *)AListGet(&m_list, i);
+        const char *got = ELMNT_STRING(AListGet(&m_list, i));
 
         MU_ASSERT_EXP_STR(tag, e, got);
     }
