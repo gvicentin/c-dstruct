@@ -67,4 +67,8 @@ void AListInsertAll(AList *l, AList *r, size_t i);
 //  return the removed element.
 Elmnt AListRemove(AList *l, size_t i);
 
+//  Revert elements in the list in place.
+//
+void AListRevert(AList *l);
+
 #endif // ALIST_H

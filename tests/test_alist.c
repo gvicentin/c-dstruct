@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "elmnt.h"
 #include "alist.c"
+#include "elmnt.h"
 #include "minunit.h"
 
 //  Globals variables
@@ -38,6 +38,7 @@ static char *test_AListPop(void);
 static char *test_AListInsert(void);
 static char *test_AListInsertAll(void);
 static char *test_AListRemove(void);
+static char *test_AListRevert(void);
 static char *allTests(void);
 
 static char *matchExpected(const char *tag, char **expected, size_t count);
@@ -263,6 +264,16 @@ static char *test_AListRemove(void) {
     return matchExpected("AListRemove", expected, count);
 }
 
+static char *test_AListRevert(void) {
+    char *expected[] = {"fizz", "11",   "buzz", "fizz", "8", "7",
+                        "fizz", "buzz", "4",    "fizz", "2", "1"};
+    size_t count = sizeof(expected) / sizeof(char *);
+
+    AListRevert(&m_list);
+
+    return matchExpected("AListRevert", expected, count);
+}
+
 static char *allTests() {
     // run all tests
     MU_RUN_TEST(test_AListCreate);
@@ -275,6 +286,7 @@ static char *allTests() {
     MU_RUN_TEST(test_AListInsert);
     MU_RUN_TEST(test_AListInsertAll);
     MU_RUN_TEST(test_AListRemove);
+    MU_RUN_TEST(test_AListRevert);
 
     return NULL;
 }

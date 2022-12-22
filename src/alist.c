@@ -106,3 +106,13 @@ Elmnt AListRemove(AList *l, size_t i) {
 
     return elmnt;
 }
+
+void AListRevert(AList *l) {
+    size_t i, j;
+
+    for (i = 0, j = l->size - 1; i < j; ++i, --j) {
+        Elmnt tmp = l->elmntArray[i];
+        l->elmntArray[i] = l->elmntArray[j];
+        l->elmntArray[j] = tmp;
+    }
+}
